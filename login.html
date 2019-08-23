@@ -1,0 +1,410 @@
+<!doctype html>
+<html>
+	<head>
+	
+		<title>LetterBox</title>
+		
+	</head>
+	  
+	<body>	  
+	
+		<strong><span id="msg">Loading...</span></strong>
+   
+		<form id="regForm" style="display: none">
+			<h2>Register: </h2>
+			Username:<br>
+			<input id="regUsername" type="text">
+			<br>
+			Password:<br>
+			<input id="regPassword" type="text">
+			<br><br>
+			<button>Submit</button>
+			<br><br><hr>
+		</form> 
+	
+		<form id="loginForm" style="display: none">
+			<h2>Login: </h2>  
+			Username:<br>
+			<input id="loginUsername" type="text">
+			<br>
+			Password:<br>
+			<input id="loginPassword" type="text">
+			<br><br>
+			<button>Submit</button>
+		</form> 
+		
+		<div id="onlinePanel" style="display: none">
+			<h2>Online: </h2>
+			<ul id="onlineList"></ul>
+			<form><button>Log Out</button></form>
+			<br><br><hr>
+		</div>
+	  
+		<div id="chatPanel" style="display: none">
+			<div id="msgContainer" style="height:400px;width:600px;overflow:auto;">
+				<ul id="messages"></ul>	
+				<ul id="msgQueue"></ul>		
+			</div>
+			<br>
+			<form id="msgForm">
+				<input id="msgBox" autocomplete="off">
+			</form>
+			
+			<br><b>Listeners:</b>
+			<ul id="listenerList"></ul>
+			
+			<form id="addListenerForm">
+				<input id="addListenerBox" autocomplete="off" /><button>Add Listener</button>
+			</form>
+			<form id="dropListenerForm">
+				<input id="dropListenerBox" autocomplete="off"><button>Drop Listener</button>
+			</form>
+		</div>
+		
+		
+	
+	
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+	<script src="https://unpkg.com/moment"></script>
+	<script>
+        var socket = io();
+		var timer;						// For animation
+		var origTitle = document.title;	// Save original title, to allow animation
+		var HTMLmsg = document.getElementById("msg");
+		
+		var myUsername = "";
+		var onlineList = [];
+		var listenerList = [];
+		var msgQueue = [];
+		
+	
+		// message handling
+		
+        $('#msgForm').submit(function(event){
+			event.preventDefault(); // prevents page reloading
+			
+			// duplicate the listenerList, as it may change from message to message if the message queue starts to back up
+			var newListenerList = [];
+			for(i = 0; i < listenerList.length; i++) {
+				newListenerList.push(listenerList[i]);
+			}
+			var data = { listeners: newListenerList, msg: $('#msgBox').val(), time: Date.now() };
+			
+			// queue the message
+			msgQueue.push(data);
+			$('#msgQueue').append($('<li>').html("<b>" + '(' + moment(data.time).format('M/DD/YYYY h:mm:ss A') + ") " + myUsername + "</b>" + ': ' + data.msg));
+			document.getElementById("msgContainer").scrollTo(0,document.getElementById("msgContainer").scrollHeight);
+			HTMLmsg.innerHTML = "Message queued...";
+			
+			// send out the message, waiting for its return
+			socket.emit('clientMsgCue', data);
+			$('#msgBox').val('');
+			return false;
+        });
+		
+        socket.on('serverMsgCue', function(data){
+		
+			// clear the queue as soon as your own message has returned from the server
+			if (data.speaker == myUsername){
+				$('#msgQueue').empty();
+				for(i = 0; i < msgQueue.length; i++)
+				{
+					if((msgQueue[i].msg == data.msg) && (msgQueue[i].time == data.time))
+					{
+						msgQueue.splice(i, 1);
+						HTMLmsg.innerHTML = "Message sent successfully!";
+					}
+					else $('#msgQueue').append($('<li>').html("<b>" + '(' + moment(data.time).format('M/DD/YYYY h:mm:ss A') + ") " + myUsername + "</b>" + ': ' + data.msg));
+					document.getElementById("msgContainer").scrollTo(0,document.getElementById("msgContainer").scrollHeight);
+				}
+			}
+			
+			$('#messages').append($('<li>').html("<b>" + '(' + moment(data.time).format('M/DD/YYYY h:mm:ss A') + ") " + data.speaker + "</b>" + ': ' + data.msg));
+			document.getElementById("msgContainer").scrollTo(0,document.getElementById("msgContainer").scrollHeight);
+			
+			// animate title
+			var currentState = false;
+			if (!document.hasFocus())
+			{			
+				clearInterval(timer);
+				timer = setInterval(startAnimation, 1000);
+			}
+				
+			function startAnimation() {
+				document.title = currentState ? origTitle : (data.speaker + " messaged! - " + origTitle);
+				currentState = !currentState;
+			}
+        });
+		
+		socket.on('newcomerCue', function(data) {
+			if (onlineList.includes(data) == false) {
+				$('#messages').append($('<li>').html('<i>' + data + ' logged on at ' + moment().format('M/DD/YYYY h:mm:ss A') + '.</i>'));
+				document.getElementById("msgContainer").scrollTo(0,document.getElementById("msgContainer").scrollHeight);
+
+				$('#onlineList').append($('<li>').html(data));
+				onlineList.push(data);
+			}
+        });
+
+		socket.on('departureCue', function(data){
+			if (myUsername == data) {
+				socket.emit('logoutCue');
+				reloadLoginScreen("Logged out.");
+				return false;
+			}
+			
+			$('#messages').append($('<li>').html('<i>' + data + ' logged off at ' + moment().format('M/DD/YYYY h:mm:ss A') + '.</i>'));		
+			document.getElementById("msgContainer").scrollTo(0,document.getElementById("msgContainer").scrollHeight);
+
+			removeFromList(document.getElementById("onlineList"), data);
+			removeFromArray(onlineList, data);
+        });
+			
+		socket.on('disconnectCue', function(data){
+			if (myUsername == data) return false;
+			
+			$('#messages').append($('<li>').html('<i>' + data + ' disconnected at ' + moment().format('M/DD/YYYY h:mm:ss A') + '.</i>'));		
+			document.getElementById("msgContainer").scrollTo(0,document.getElementById("msgContainer").scrollHeight);
+
+			removeFromList(document.getElementById("onlineList"), data);
+			removeFromArray(onlineList, data);
+        });
+
+		
+  
+		// Listener handling
+		
+        $('#addListenerForm').submit(function(event){
+			event.preventDefault(); // prevents page reloading
+			socket.emit('addListenerCue', $('#addListenerBox').val());
+			$('#addListenerBox').val('');
+			return false;
+        });
+		
+        $('#dropListenerForm').submit(function(event){
+			event.preventDefault(); // prevents page reloading
+			removeFromList(document.getElementById("listenerList"), $('#dropListenerBox').val());
+			removeFromArray(listenerList, $('#dropListenerBox').val());
+			$('#dropListenerBox').val('');
+			return false;
+        });
+		
+        socket.on('addListenerConfirmCue', function(data){
+			HTMLmsg.innerHTML = "Listener added!";
+			
+			// First clear the list and remove the recipient if they're already there
+			removeFromList(document.getElementById("listenerList"), data);
+			removeFromArray(listenerList, data);
+			
+			// Add the new recipient
+			listenerList.push(data);
+			$('#listenerList').append($('<li>').html(data));
+        });
+		
+        socket.on('addListenerFailCue', function(data){
+			HTMLmsg.innerHTML = "Username doesn't exist!";
+		});
+		
+        socket.on('selfListenerCue', function(data){
+			HTMLmsg.innerHTML = "You will always hear yourself.";
+		});
+		
+		
+		
+		// Login handling
+		
+		// check for existing cookie and attempt login automatically
+		
+        $('#loginForm').submit(function(event){
+			event.preventDefault(); // prevents page reloading
+			socket.emit('loginCue', { username: $('#loginUsername').val(), password: $('#loginPassword').val() });
+			HTMLmsg.innerHTML = "Logging in...";
+			setCookie("username", $('#loginUsername').val(), 1);
+			setCookie("password", $('#loginPassword').val(), 1);
+			$('#loginPassword').val('');
+			$('#loginUsername').val('');
+			return false;
+        });
+		
+		socket.on('loginFailCue', function(){
+			reloadLoginScreen("Invalid username or password.");
+        });
+		
+        socket.on('loginConfirmCue', function(data){
+			if (myUsername != data.username) {
+				// reload everything
+				myUsername = data.username;
+				
+				$('#msgQueue').empty();
+				msgQueue.length = 0;
+				
+				for(i = 0; i < data.listeners.length; i++)
+				{
+					$('#listenerList').append($('<li>').html(data.listeners[i]));
+					listenerList.push(data.listeners[i]);
+					socket.emit('addListenerCue', data.listeners[i]);
+				}
+			}
+			else {
+				// keep everything, as this is a recovery from a disconnect; but handle the queue
+				for(i = 0; i < msgQueue.length; i++)
+				{
+					msgQueue[i].time = Date.now();
+					socket.emit('clientMsgCue', msgQueue[i]);
+				}
+			}
+		
+			// reload messages from database
+			$('#messages').empty();
+			for (x in data.msgs){
+				$('#messages').append($('<li>').html("<b>" + '(' + moment(data.msgs[x].time).format('M/DD/YYYY h:mm:ss A') + ") " + data.msgs[x].speaker + "</b>" + ': ' + data.msgs[x].msg));
+			}
+				
+			$('#messages').append($('<li>').html('<i>' + data.username + ' (you) logged on at ' + moment().format('M/DD/YYYY h:mm:ss A') + '.</i>'));
+			
+			HTMLmsg.innerHTML = "Login success! Start chatting!";
+			document.getElementById("loginForm").style.display = "none";
+			document.getElementById("regForm").style.display = "none";
+			
+			document.getElementById("onlinePanel").style.display = "inline";
+			document.getElementById("chatPanel").style.display = "inline";
+			
+			for(i = 0; i < data.usernames.length; i++)
+			{
+				$('#onlineList').append($('<li>').html(data.usernames[i]));
+				onlineList.push(data.usernames[i]);
+			}
+        });
+		
+		socket.on('connect', function(){
+			socket.sendBuffer = [];	// When recovering after a disconnect, socket should give up on sending old messages
+			if (getCookie("username") != "") {
+				socket.emit('loginCue', { username: getCookie("username"), password: getCookie("password") });
+			}
+			else reloadLoginScreen("First time users need to register a username. Then log in below.");
+        });
+		
+		
+		
+		// Logout handling
+		
+        $('#onlinePanel').submit(function(event){
+			event.preventDefault(); // prevents page reloading
+			socket.emit('logoutCue');
+			reloadLoginScreen("Logged out.");
+			return false;
+        });
+		
+		socket.on('disconnect', function(){
+			HTMLmsg.innerHTML = "You disconnected at " + moment().format('M/DD/YYYY h:mm:ss A') + ".";
+			$('#messages').append($('<li>').html('<i>You disconnected at ' + moment().format('M/DD/YYYY h:mm:ss A') + '.</i>'));
+			
+			$('#onlineList').empty();	
+		    onlineList.length = 0;
+		});
+		
+  
+  
+		// Registration handling
+		
+        $('#regForm').submit(function(event){
+			event.preventDefault(); // prevents page reloading
+			socket.emit('regCue', { username: $('#regUsername').val(), password: $('#regPassword').val() });
+			$('#regPassword').val('');
+			$('#regUsername').val('');
+			return false;
+        });
+		
+        socket.on('regExistCue', function(){
+			HTMLmsg.innerHTML = "Username taken; choose another.";
+        });
+		
+        socket.on('regShortCue', function(){
+			HTMLmsg.innerHTML = "Username must be at least 2 characters.";
+        });
+		
+        socket.on('regConfirmCue', function(){
+			HTMLmsg.innerHTML = "User added!";
+        });
+		
+		
+		
+  
+		// Change page title back on focus		
+		$(window).focus(function(){
+			clearInterval(timer);
+			document.title = origTitle; // restore original title
+		});
+  
+		// Cookie functions from W3Schools
+  
+		function setCookie(cname,cvalue,exdays){
+		  var d = new Date();
+		  d.setTime(d.getTime() + (exdays*24*60*60*1000));
+		  var expires = "expires=" + d.toGMTString();
+		  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+		}
+		
+		function getCookie(cname){
+		  var name = cname + "=";
+		  var ca = document.cookie.split(';');
+		  for(var i = 0; i < ca.length; i++) {
+			var c = ca[i];
+			while (c.charAt(0) == ' ') {
+			  c = c.substring(1);
+			}
+			if (c.indexOf(name) == 0) {
+			  return c.substring(name.length, c.length);
+			}
+		  }
+		  return "";
+		}
+		
+		function reloadLoginScreen(msg){
+			document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+			document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+				
+			document.getElementById("onlinePanel").style.display = "none";
+			document.getElementById("chatPanel").style.display = "none";
+			
+			document.getElementById("regForm").style.display = "inline";
+			document.getElementById("loginForm").style.display = "inline";
+			
+			$('#messages').empty();
+			$('#onlineList').empty();
+			$('#listenerList').empty();
+			$('#msgQueue').empty();	
+			
+		    onlineList.length = 0;
+			listenerList.length = 0;
+			msgQueue.length = 0;
+			myUsername = "";
+			
+			HTMLmsg.innerHTML = msg;
+		}
+		
+		function removeFromList(element, keyword) {
+			for(i = 0; i < element.children.length; i++)
+			{
+				if (element.children[i].innerHTML == keyword){
+					element.removeChild(element.children[i]); 
+					i--;
+				}
+			}
+		}
+		
+		function removeFromArray(arr, keyword) {
+			for(i = 0; i < arr.length; i++)
+			{
+				if (arr[i] == keyword) {
+					arr.splice(i, 1);
+					i--;
+				}
+			}
+		}
+
+		
+    </script>
+	</body>
+</html>
