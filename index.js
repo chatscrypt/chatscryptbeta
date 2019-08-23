@@ -6,8 +6,7 @@ var port = process.env.PORT || 3000;
 const moment = require('moment'); // for timestamps
 
 var MongoClient = require('mongodb').MongoClient;
-//var url = "mongodb+srv://vbkellis:my1password@firstcluster-5wdsw.mongodb.net/test?retryWrites=true&w=majority";
-var url = "mongodb+srv://chipingai:Password0212@cluster0-fpdph.gcp.mongodb.net/test?retryWrites=true&w=majority";
+var url = "mongodb+srv://chatscrypt:my1password@chatscrypt-kvqx0.mongodb.net/test?retryWrites=true&w=majority";
 var connection = MongoClient.connect(url, {useNewUrlParser: true});
 
 var onlineList = [];
