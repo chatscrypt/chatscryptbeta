@@ -15,7 +15,7 @@ var connection = MongoClient.connect(url, {useNewUrlParser: true});
 var onlineList = [];
 
 app.get('/', function(req, res){
-	res.sendFile(__dirname + '/login.html');
+	res.sendFile(__dirname + '/index.html');
 });
 
 
