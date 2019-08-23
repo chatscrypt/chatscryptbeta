@@ -19,6 +19,22 @@ app.get('/', function(req, res){
 });
 
 
+
+connection.then(function(db){
+	var myquery = { dataName: "currentChatID" };
+	connection.then(function(db){			
+		db.db(database).collection("data").find(myquery).toArray(function(err, result) {
+			if (err) throw err;
+			if (result.length == 0) {
+				var newChatIDNumber = { dataName: "currentChatID", dataValue:1 };
+				db.db(database).collection("data").insertOne(newChatIDNumber, function(err, res) {
+					if (err) throw err;
+				});
+			}
+		});
+	});		  
+}); 
+
 io.on('connection', function(socket){
 	
 	socket.username = '';
@@ -44,9 +60,29 @@ io.on('connection', function(socket){
 					socket.emit('regExistCue');
 				}
 			});
-		});		  
+		}); 
 	});
   
+	
+	socket.on('newChatCue', function(){
+ 		var myquery = { dataName: "currentChatID" };
+		var newValue;
+		var newValues;
+		connection.then(function(db){			
+			db.db(database).collection("data").find(myquery).toArray(function(err, result) {
+				newValue = result[0].dataValue;
+				newValue++;
+ 				newvalues = { $set: {dataValue: newValue } };	
+			});
+			
+			db.db(database).collection("data").updateOne(myquery, newvalues, function(err, res) {
+  				if (err) throw err;
+			});
+		});
+		socket.emit('newChatIDCue', newValue);
+	});
+	
+	
 	socket.on('loginCue', function(data) {		
 		connection.then(function(db){
 			db.db(database).collection("users").find(data).toArray(function(err, result) {
@@ -55,14 +91,6 @@ io.on('connection', function(socket){
 					socket.emit('loginFailCue');
 				}
 				else {
-					//for (x in io.sockets.sockets)
-					//{
-					//	if (io.sockets.connected[x].username == data.username)
-					//	{
-					//		socket.emit('alreadyLoginCue');
-					//		return false;
-					//	}
-					//}
 					socket.username = data.username;
 					socket.join('loggedIn');
 					if (onlineList.includes(socket.username) == false) 
