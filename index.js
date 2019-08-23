@@ -7,6 +7,7 @@ const moment = require('moment'); // for timestamps
 
 var MongoClient = require('mongodb').MongoClient;
 var url = "mongodb+srv://chatscrypt:my1password@chatscrypt-kvqx0.mongodb.net/test?retryWrites=true&w=majority";
+const database = "betadb";
 var connection = MongoClient.connect(url, {useNewUrlParser: true});
 
 var onlineList = [];
@@ -29,10 +30,10 @@ io.on('connection', function(socket){
 		
 		var query = { username: data.username };
 		connection.then(function(db){
-			db.db("mydb").collection("betausers").find(query).toArray(function(err, result) {
+			db.db(database).collection("users").find(query).toArray(function(err, result) {
 				if (err) throw err;
 				if (result.length == 0) {
-					db.db("mydb").collection("betausers").insertOne(data, function(err, res) {
+					db.db(database).collection("users").insertOne(data, function(err, res) {
 						if (err) throw err;
 					});
 					socket.emit('regConfirmCue');
@@ -46,7 +47,7 @@ io.on('connection', function(socket){
   
 	socket.on('loginCue', function(data) {		
 		connection.then(function(db){
-			db.db("mydb").collection("betausers").find(data).toArray(function(err, result) {
+			db.db(database).collection("users").find(data).toArray(function(err, result) {
 				if (err) throw err;
 				if (result.length == 0) {
 					socket.emit('loginFailCue');
@@ -68,7 +69,7 @@ io.on('connection', function(socket){
 						socket.broadcast.to('loggedIn').emit('newcomerCue', data.username);
 					}
 					
-					db.db("mydb").collection("betamessages").find({ $or:[{ listeners: data.username }, { speaker: socket.username }] }).toArray(function(err, res) {
+					db.db(database).collection("messages").find({ $or:[{ listeners: data.username }, { speaker: socket.username }] }).toArray(function(err, res) {
 						if (err) throw err;
 						var recent = 0;
 						var defaultListeners = [];
@@ -131,7 +132,7 @@ io.on('connection', function(socket){
 		// add message to database
 		var dbData = { speaker:socket.username, listeners:data.listeners, msg:data.msg, time:data.time };
 		connection.then(function(db){
-				db.db("mydb").collection("betamessages").insertOne(dbData, function(err, res) {
+				db.db(database).collection("messages").insertOne(dbData, function(err, res) {
 					if (err) throw err;
 				});
 		});
@@ -152,7 +153,7 @@ io.on('connection', function(socket){
 		}
 		
 		connection.then(function(db){
-			db.db("mydb").collection("betausers").find({ username: candidate }).toArray(function(err, result) {
+			db.db(database).collection("users").find({ username: candidate }).toArray(function(err, result) {
 				if (err) throw err;
 				if (result.length == 0) 
 					socket.emit('addListenerFailCue');
