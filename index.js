@@ -6,6 +6,8 @@ var port = process.env.PORT || 3000;
 const moment = require('moment'); // for timestamps
 
 var MongoClient = require('mongodb').MongoClient;
+
+// If you change the database, change BOTH URL and the constant database!
 var url = "mongodb+srv://chatscrypt:my1password@chatscrypt-kvqx0.mongodb.net/test?retryWrites=true&w=majority";
 const database = "betadb";
 var connection = MongoClient.connect(url, {useNewUrlParser: true});
