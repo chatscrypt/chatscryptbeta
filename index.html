@@ -1,13 +1,10 @@
 <!doctype html>
 <html>
 	<head>
-	
-		<title>ChatScrypt Beta</title>
-		
+		<title>ChatScrypt Beta</title>		
 	</head>
 	  
-	<body>	  
-	
+	<body>	  	
 		<strong><span id="msg">Loading...</span></strong>
    
 		<form id="regForm" style="display: none">
@@ -39,8 +36,15 @@
 			<form><button>Log Out</button></form>
 			<br><br><hr>
 		</div>
-	  
+		
 		<div id="chatPanel" style="display: none">
+			<h2>List of Chats: </h2>
+			<ul id="chatList"></ul>
+			<form><button>New Chat</button></form>
+			<br><br><hr>
+		</div>
+	  
+		<div id="chatWindow" style="display: none">
 			<div id="msgContainer" style="height:400px;width:600px;overflow:auto;">
 				<ul id="messages"></ul>	
 				<ul id="msgQueue"></ul>		
@@ -76,7 +80,9 @@
 		var myUsername = "";
 		var onlineList = [];
 		var listenerList = [];
+		var chatList = [];
 		var msgQueue = [];
+		var currentChatID = 0;
 		
 	
 		// message handling
@@ -268,6 +274,7 @@
 			document.getElementById("regForm").style.display = "none";
 			
 			document.getElementById("onlinePanel").style.display = "inline";
+			document.getElementById("chatWindow").style.display = "inline";
 			document.getElementById("chatPanel").style.display = "inline";
 			
 			for(i = 0; i < data.usernames.length; i++)
@@ -295,6 +302,30 @@
 			reloadLoginScreen("Logged out.");
 			return false;
         });
+		
+		socket.on('disconnect', function(){
+			HTMLmsg.innerHTML = "You disconnected at " + moment().format('M/DD/YYYY h:mm:ss A') + ".";
+			$('#messages').append($('<li>').html('<i>You disconnected at ' + moment().format('M/DD/YYYY h:mm:ss A') + '.</i>'));
+			
+			$('#onlineList').empty();	
+		    onlineList.length = 0;
+		});
+		
+		
+				
+		// List of chats handling
+		
+        $('#chatPanel').submit(function(event){
+			event.preventDefault(); // prevents page reloading
+			socket.emit('newChatCue');
+			return false;
+        });
+		
+		
+		
+        	socket.on('newChatIDCue', function(data){
+			currentChatID = data;
+        	});
 		
 		socket.on('disconnect', function(){
 			HTMLmsg.innerHTML = "You disconnected at " + moment().format('M/DD/YYYY h:mm:ss A') + ".";
@@ -366,6 +397,7 @@
 			document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
 				
 			document.getElementById("onlinePanel").style.display = "none";
+			document.getElementById("chatWindow").style.display = "none";
 			document.getElementById("chatPanel").style.display = "none";
 			
 			document.getElementById("regForm").style.display = "inline";
