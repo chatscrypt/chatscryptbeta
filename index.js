@@ -80,6 +80,17 @@ io.on('connection', function(socket){
 	});
 	
 	
+	socket.on('addChatIDCue', function(data){
+ 		var myQuery = { username: socket.username };
+ 		var newValues = { $push: { chatList: data } };
+		connection.then(function(db){			
+			db.db(database).collection("users").updateOne(myQuery, newValues, function(err, res) {
+  				if (err) throw err;
+			});
+		});
+	});
+	
+	
 	socket.on('loginCue', function(data) {		
 		connection.then(function(db){
 			db.db(database).collection("users").find(data).toArray(function(err, result) {
