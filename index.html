@@ -110,10 +110,6 @@
 			return false;
         });
 			
-        socket.on('addChatIDCue', function(data){
-		$('#chatList').append($('<li>').html(data));
-		chatList.push(data);
-	});
 		
         socket.on('serverMsgCue', function(data){
 		
@@ -131,9 +127,15 @@
 					document.getElementById("msgContainer").scrollTo(0,document.getElementById("msgContainer").scrollHeight);
 				}
 			}
-			socket.emit('checkChatIDCue', data.chatID);
+		
+			removeFromList(document.getElementById("chatList"), data.chatID);
+			removeFromArray(chatList, data.chatID);
+			
+			chatList.push(data.chatID);
+			$('#chatList').append($('<li>').html(data.chatID));
 			    
 			currentChatID = data.chatID;
+		
 			$('#messages').append($('<li>').html("<b>" + '(' + moment(data.time).format('M/DD/YYYY h:mm:ss A') + ") " + data.speaker + "</b>" + ': ' + data.msg));
 			document.getElementById("msgContainer").scrollTo(0,document.getElementById("msgContainer").scrollHeight);
 			
