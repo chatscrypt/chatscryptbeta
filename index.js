@@ -178,10 +178,10 @@ io.on('connection', function(socket){
 				var myQueryTest = { username: data.listeners[i], chatList:currentChatID };
 				var myQuery = { username: data.listeners[i] };
 				var newValues = { $push: { chatList: currentChatID } };
-				db.db(database).collection("users").find(myQueryTest).toArray(function(err, result) {
+				db.db(database).collection("users").find({ username: data.listeners[i], chatList:currentChatID }).toArray(function(err, result) {
 					if (err) throw err;				
 					if (result.length == 0) {
-						db.db(database).collection("users").updateOne(myQuery, newValues, function(err, res) {
+						db.db(database).collection("users").updateOne( { username: data.listeners[i] }, { $push: { chatList: currentChatID } }, function(err, res) {
 							if (err) throw err;
 							for (x in io.sockets.adapter.rooms['loggedIn'].sockets)
 							{
@@ -197,10 +197,10 @@ io.on('connection', function(socket){
 			var myQueryTest = { username: socket.username, chatList:currentChatID };
 			var myQuery = { username: socket.username };
 			var newValues = { $push: { chatList: currentChatID } };
-			db.db(database).collection("users").find(myQueryTest).toArray(function(err, result) {
+			db.db(database).collection("users").find({ username: socket.username, chatList:currentChatID }).toArray(function(err, result) {
 				if (err) throw err;				
 				if (result.length == 0) {
-					db.db(database).collection("users").updateOne(myQuery, newValues, function(err, res) {
+					db.db(database).collection("users").updateOne({ username: socket.username },  { $push: { chatList: currentChatID } }, function(err, res) {
 						if (err) throw err;
 						socket.emit('addChatIDCue', currentChatID);
 					});
