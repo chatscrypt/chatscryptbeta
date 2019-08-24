@@ -134,9 +134,10 @@
 			chatList.push(data.chatID);
 			$('#chatList').append($('<li>').html("<button onclick=\"myFunction(" + data.chatID + ")\">Chat " + data.chatID + "</button>"));
 			    
-			if (currentChatID != data.chatID)
-				$('#messages').empty();
-			currentChatID = data.chatID;
+			if (currentChatID != data.chatID) {
+				socket.emit('loadChatCue', data.chatID);
+				currentChatID = data.chatID;
+			}
 		
 			$('#messages').append($('<li>').html("<b>" + '(' + moment(data.time).format('M/DD/YYYY h:mm:ss A') + ") " + data.speaker + "</b>" + ': ' + data.msg));
 			document.getElementById("msgContainer").scrollTo(0,document.getElementById("msgContainer").scrollHeight);
