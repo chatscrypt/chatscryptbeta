@@ -13,12 +13,11 @@ const database = "betadb";
 var connection = MongoClient.connect(url, {useNewUrlParser: true});
 
 var onlineList = [];
+var currentChatID = 0;
 
 app.get('/', function(req, res){
 	res.sendFile(__dirname + '/index.html');
 });
-
-
 
 connection.then(function(db){
 	var myquery = { dataName: "currentChatID" };
@@ -30,6 +29,9 @@ connection.then(function(db){
 				db.db(database).collection("data").insertOne(newChatIDNumber, function(err, res) {
 					if (err) throw err;
 				});
+			}
+			else {
+				currentChatID = result[0].dataValue;
 			}
 		});
 	});		  
@@ -65,18 +67,13 @@ io.on('connection', function(socket){
   
 	
 	socket.on('newChatCue', function(){
+		currentChatID++;
  		var myquery = { dataName: "currentChatID" };
-		var newValue;
-		var newValues;
+ 		var newvalues = { $set: {dataValue: currentChatID } };
 		connection.then(function(db){			
-			db.db(database).collection("data").find(myquery).toArray(function(err, result) {
-				newValue = result[0].dataValue;
-				newValue++;
- 				newvalues = { $set: {dataValue: newValue } };	
-				db.db(database).collection("data").updateOne(myquery, newvalues, function(err, res) {
-  					if (err) throw err;
-					socket.emit('newChatIDCue', newValue);
-				});
+			db.db(database).collection("data").updateOne(myquery, newvalues, function(err, res) {
+  				if (err) throw err;
+				socket.emit('newChatIDCue', newValue);
 			});
 		});
 	});
