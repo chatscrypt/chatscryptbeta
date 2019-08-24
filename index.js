@@ -97,7 +97,7 @@ io.on('connection', function(socket){
 						if (err) throw err;
 						var recent = 0;
 						var defaultListeners = [];
-						var currentChatID = 1;
+						var currentChatID = 0;
 						for (x in res){
 							if (res[x].time > recent)
 							{
