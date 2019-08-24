@@ -259,6 +259,7 @@
 			$('#messages').append($('<li>').html("<b>" + '(' + moment(data.msgs[x].time).format('M/DD/YYYY h:mm:ss A') + ") " + data.msgs[x].speaker + "</b>" + ': ' + data.msgs[x].msg));
 		}
 		
+		$('#listenerList').empty();
 		for(i = 0; i < data.listeners.length; i++)
 		{
 			socket.emit('addListenerCue', data.listeners[i]);
@@ -367,6 +368,8 @@
         $('#chatPanel').submit(function(event){
 			event.preventDefault(); // prevents page reloading
 			$('#messages').empty();
+			$('#listenerList').empty();
+		
 			currentChatID = 0;
 			return false;
         });
