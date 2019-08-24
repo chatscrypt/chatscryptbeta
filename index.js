@@ -66,12 +66,18 @@ io.on('connection', function(socket){
 	});
 
 	
-	socket.on('addChatIDCue', function(data){
+	socket.on('newChatIDCue', function(data){
+ 		var myQueryTest = { username: socket.username, chatList: data };
  		var myQuery = { username: socket.username };
  		var newValues = { $push: { chatList: data } };
-		connection.then(function(db){			
-			db.db(database).collection("users").updateOne(myQuery, newValues, function(err, res) {
-  				if (err) throw err;
+		connection.then(function(db){		
+			db.db(database).collection("users").find(myQueryTest).toArray(function(err, result) {
+				if (err) throw err;				
+				if (result.length == 0) {
+					db.db(database).collection("users").updateOne(myQuery, newValues, function(err, res) {
+						if (err) throw err;
+					});
+				}
 			});
 		});
 	});
