@@ -111,6 +111,7 @@
         });
 			
         socket.on('addChatIDCue', function(data){
+		HTMLmsg.innerHTML = "reaching addchatID";
 		$('#chatList').append($('<li>').html(data));
 		chatList.push(data);
 	});
