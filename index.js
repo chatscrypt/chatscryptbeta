@@ -68,12 +68,12 @@ io.on('connection', function(socket){
 	
 	socket.on('newChatCue', function(){
 		currentChatID++;
- 		var myquery = { dataName: "currentChatID" };
- 		var newvalues = { $set: {dataValue: currentChatID } };
+ 		var myQuery = { dataName: "currentChatID" };
+ 		var newValues = { $set: {dataValue: currentChatID } };
 		connection.then(function(db){			
-			db.db(database).collection("data").updateOne(myquery, newvalues, function(err, res) {
+			db.db(database).collection("data").updateOne(myQuery, newValues, function(err, res) {
   				if (err) throw err;
-				socket.emit('newChatIDCue', newValue);
+				socket.emit('newChatIDCue', currentChatID);
 			});
 		});
 	});
