@@ -25,11 +25,10 @@ connection.then(function(db){
 		db.db(database).collection("data").find(myquery).toArray(function(err, result) {
 			if (err) throw err;
 			if (result.length == 0) {
-				var newChatIDNumber = { dataName: "maxChatID", dataValue:1 };
+				var newChatIDNumber = { dataName: "maxChatID", dataValue:0 };
 				db.db(database).collection("data").insertOne(newChatIDNumber, function(err, res) {
 					if (err) throw err;
 				});
-				maxChatID = 1;
 			}
 			else {
 				maxChatID = result[0].dataValue;
@@ -65,20 +64,7 @@ io.on('connection', function(socket){
 			});
 		}); 
 	});
-  
-	
-	socket.on('newChatCue', function(){
-		maxChatID++;
- 		var myQuery = { dataName: "maxChatID" };
- 		var newValues = { $set: {dataValue: maxChatID } };
-		connection.then(function(db){			
-			db.db(database).collection("data").updateOne(myQuery, newValues, function(err, res) {
-  				if (err) throw err;
-				socket.emit('newChatIDCue', maxChatID);
-			});
-		});
-	});
-	
+
 	
 	socket.on('addChatIDCue', function(data){
  		var myQuery = { username: socket.username };
@@ -162,6 +148,17 @@ io.on('connection', function(socket){
 	});
   
 	socket.on('clientMsgCue', function(data){
+		
+		if (data.chatID == 0) {
+			maxChatID++;
+			var myQuery = { dataName: "maxChatID" };
+			var newValues = { $set: {dataValue: maxChatID } };
+			connection.then(function(db){			
+				db.db(database).collection("data").updateOne(myQuery, newValues, function(err, res) {
+					if (err) throw err;
+				});
+			});
+		}
 		
 		// send to listed listeners
 		for (i = 0; i < data.listeners.length; i++)
