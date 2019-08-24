@@ -138,7 +138,7 @@ io.on('connection', function(socket){
 	});
   
 	
-	socket.on('checkChatIDCue', function(data)) {
+	socket.on('checkChatIDCue', function(data) {
 		var query = { username: socket.username, chatList: data };
 		connection.then(function(db){
 			db.db(database).collection("users").find(query).toArray(function(err, result) {
