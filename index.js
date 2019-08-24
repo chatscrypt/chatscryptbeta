@@ -104,6 +104,29 @@ io.on('connection', function(socket){
 		});
 	});
 	
+	
+	
+	
+	socket.on('loadChatCue', function(data) {		
+		connection.then(function(db){
+			db.db(database).collection("messages").find({ $and: [{chatID:data}, {$or:[{ listeners: data.username }, { speaker: socket.username }]} ] }).toArray(function(err, res) {
+				if (err) throw err;
+				var recent = 0;
+				var defaultListeners = [];
+				for (x in res){
+					if (res[x].time > recent)
+					{
+						recent = res[x].time;
+						if (res[x].speaker == socket.username)
+							defaultListeners = res[x].listeners;
+					}
+				}
+				socket.emit('loadChatConfirmCue', { listeners:defaultListeners, msgs:res });
+			});					
+				
+		});
+	});
+	
 	socket.on('logoutCue', function(){
 		socket.leave('loggedIn');	
 		
