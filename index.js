@@ -100,11 +100,17 @@ io.on('connection', function(socket){
 						if (err) throw err;
 						var recent = 0;
 						var defaultListeners = [];
+						var currentChatID = 0;
 						for (x in res){
-							if ((res[x].speaker == socket.username) && (res[x].time > recent))
-								defaultListeners = res[x].listeners;
+							if (res[x].time > recent)
+							{
+								recent = res[x].time;
+								currentChatID = res[x].chatID;
+								if (res[x].speaker == socket.username)
+									defaultListeners = res[x].listeners;
+							}
 						}
-						socket.emit('loginConfirmCue', { username:socket.username, usernames:onlineList, listeners:defaultListeners, msgs:res });
+						socket.emit('loginConfirmCue', { username:socket.username, usernames:onlineList, listeners:defaultListeners, msgs:res, currentChatID:currentchatID });
 					});					
 				}
 			});
