@@ -318,24 +318,8 @@
 			$('#onlineList').empty();	
 		    onlineList.length = 0;
 		});
+	
 		
-		
-				
-		// List of chats handling
-		
-        $('#chatPanel').submit(function(event){
-			event.preventDefault(); // prevents page reloading
-			socket.emit('newChatCue');
-			return false;
-        });
-		
-		
-		
-        	socket.on('newChatIDCue', function(data){
-			currentChatID = data;
-			console.log(data);
-			HTMLmsg.innerHTML = "Current chat ID: " + data;
-        	});
 		
 		socket.on('disconnect', function(){
 			HTMLmsg.innerHTML = "You disconnected at " + moment().format('M/DD/YYYY h:mm:ss A') + ".";
@@ -344,6 +328,19 @@
 			$('#onlineList').empty();	
 		    onlineList.length = 0;
 		});
+		
+		
+		
+		
+				
+		// List of chats handling
+		
+        $('#chatPanel').submit(function(event){
+			event.preventDefault(); // prevents page reloading
+			currentChatID = 0;
+			return false;
+        });
+		
 		
   
   
