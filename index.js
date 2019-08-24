@@ -109,7 +109,7 @@ io.on('connection', function(socket){
 	
 	socket.on('loadChatCue', function(data) {		
 		connection.then(function(db){
-			db.db(database).collection("messages").find({ $and: [{chatID:data}, {$or:[{ listeners: data.username }, { speaker: socket.username }]} ] }).toArray(function(err, res) {
+			db.db(database).collection("messages").find({ $and: [{chatID:data}, {$or:[{ listeners: socket.username }, { speaker: socket.username }]} ] }).toArray(function(err, res) {
 				if (err) throw err;
 				var recent = 0;
 				var defaultListeners = [];
