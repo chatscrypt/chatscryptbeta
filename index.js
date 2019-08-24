@@ -73,13 +73,12 @@ io.on('connection', function(socket){
 				newValue = result[0].dataValue;
 				newValue++;
  				newvalues = { $set: {dataValue: newValue } };	
-			});
-			
-			db.db(database).collection("data").updateOne(myquery, newvalues, function(err, res) {
-  				if (err) throw err;
+				db.db(database).collection("data").updateOne(myquery, newvalues, function(err, res) {
+  					if (err) throw err;
+					socket.emit('newChatIDCue', newValue);
+				});
 			});
 		});
-		socket.emit('newChatIDCue', newValue);
 	});
 	
 	
