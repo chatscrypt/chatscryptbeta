@@ -363,6 +363,7 @@
 		
         $('#chatPanel').submit(function(event){
 			event.preventDefault(); // prevents page reloading
+			$('#messages').empty();
 			currentChatID = 0;
 			return false;
         });
