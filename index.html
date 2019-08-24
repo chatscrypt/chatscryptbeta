@@ -128,11 +128,11 @@
 				}
 			}
 		
-			removeFromList(document.getElementById("chatList"), data.chatID);
+			removeFromList(document.getElementById("chatList"), "<form id=\"chat"+ data.chatID + "\"><button>Chat " + data.chatID + "</button></form>");
 			removeFromArray(chatList, data.chatID);
 			
 			chatList.push(data.chatID);
-			$('#chatList').append($('<li>').html(data.chatID));
+			$('#chatList').append($('<li>').html("<form id=\"chat"+ data.chatID + "\"><button>Chat " + data.chatID + "</button></form>"));
 			    
 			currentChatID = data.chatID;
 		
@@ -263,7 +263,7 @@
 				
 				for(i = 0; i < data.chatList.length; i++)
 				{
-					$('#chatList').append($('<li>').html(data.chatList[i]));
+					$('#chatList').append($('<li>').html("<form id=\"chat"+ data.chatList[i] + "\"><button>Chat " + data.chatList[i] + "</button></form>"));
 					chatList.push(data.chatList[i]);
 				}
 			}
