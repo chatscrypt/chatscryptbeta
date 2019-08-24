@@ -126,8 +126,12 @@
 					document.getElementById("msgContainer").scrollTo(0,document.getElementById("msgContainer").scrollHeight);
 				}
 			}
+			if (currentChatID != data.chatID) {
+				socket.emit('addChatIDCue', data.chatID);
+			}
+			    
+			    
 			currentChatID = data.chatID;
-			
 			$('#messages').append($('<li>').html("<b>" + '(' + moment(data.time).format('M/DD/YYYY h:mm:ss A') + ") " + data.speaker + "</b>" + ': ' + data.msg));
 			document.getElementById("msgContainer").scrollTo(0,document.getElementById("msgContainer").scrollHeight);
 			
