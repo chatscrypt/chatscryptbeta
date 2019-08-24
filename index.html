@@ -138,10 +138,11 @@
 				socket.emit('loadChatCue', data.chatID);
 				currentChatID = data.chatID;
 			}
-		
+			else {
 			$('#messages').append($('<li>').html("<b>" + '(' + moment(data.time).format('M/DD/YYYY h:mm:ss A') + ") " + data.speaker + "</b>" + ': ' + data.msg));
 			document.getElementById("msgContainer").scrollTo(0,document.getElementById("msgContainer").scrollHeight);
-			
+			}
+				
 			// animate title
 			var currentState = false;
 			if (!document.hasFocus())
@@ -258,6 +259,7 @@
 		for (x in data.msgs) {
 			$('#messages').append($('<li>').html("<b>" + '(' + moment(data.msgs[x].time).format('M/DD/YYYY h:mm:ss A') + ") " + data.msgs[x].speaker + "</b>" + ': ' + data.msgs[x].msg));
 		}
+		document.getElementById("msgContainer").scrollTo(0,document.getElementById("msgContainer").scrollHeight);
 		
 		$('#listenerList').empty();
 		listenerList.length = 0;
