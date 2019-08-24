@@ -149,8 +149,10 @@ io.on('connection', function(socket){
   
 	socket.on('clientMsgCue', function(data){
 		
+		var currentChatID = data.chatID;		
 		if (data.chatID == 0) {
 			maxChatID++;
+			currentChatID = maxChatID;
 			var myQuery = { dataName: "maxChatID" };
 			var newValues = { $set: {dataValue: maxChatID } };
 			connection.then(function(db){			
@@ -160,18 +162,19 @@ io.on('connection', function(socket){
 			});
 		}
 		
+		
 		// send to listed listeners
 		for (i = 0; i < data.listeners.length; i++)
 		{
 			for (x in io.sockets.adapter.rooms['loggedIn'].sockets)
 			{
 				if (io.sockets.connected[x].username == data.listeners[i])
-					io.sockets.connected[x].emit('serverMsgCue', { speaker:socket.username, msg:data.msg, time:data.time, chatID:data.chatID });
+					io.sockets.connected[x].emit('serverMsgCue', { speaker:socket.username, msg:data.msg, time:data.time, chatID:currentChatID });
 			}
 		}
 		
 		// add message to database
-		var dbData = { speaker:socket.username, listeners:data.listeners, msg:data.msg, time:data.time, chatID:data.chatID };
+		var dbData = { speaker:socket.username, listeners:data.listeners, msg:data.msg, time:data.time, chatID:currentChatID };
 		connection.then(function(db){
 				db.db(database).collection("messages").insertOne(dbData, function(err, res) {
 					if (err) throw err;
@@ -182,7 +185,7 @@ io.on('connection', function(socket){
 		for (x in io.sockets.adapter.rooms['loggedIn'].sockets)
 		{
 			if (io.sockets.connected[x].username == socket.username)
-				io.sockets.connected[x].emit('serverMsgCue', { speaker:socket.username, msg:data.msg, time:data.time, chatID:data.chatID });
+				io.sockets.connected[x].emit('serverMsgCue', { speaker:socket.username, msg:data.msg, time:data.time, chatID:currentChatID });
 		}
 	});
 	
