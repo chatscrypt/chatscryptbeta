@@ -241,7 +241,6 @@
         socket.on('loginConfirmCue', function(data){
 			if (myUsername != data.username) {
 				// reload everything
-				myUsername = data.username;
 				
 				$('#msgQueue').empty();
 				msgQueue.length = 0;
@@ -261,6 +260,9 @@
 					socket.emit('clientMsgCue', msgQueue[i]);
 				}
 			}
+		
+			currentChatID = data.currentChatID;
+			myUsername = data.username;
 		
 			// reload messages from database
 			$('#messages').empty();
