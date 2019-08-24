@@ -29,6 +29,7 @@ connection.then(function(db){
 				db.db(database).collection("data").insertOne(newChatIDNumber, function(err, res) {
 					if (err) throw err;
 				});
+				maxChatID = 1;
 			}
 			else {
 				maxChatID = result[0].dataValue;
