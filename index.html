@@ -325,6 +325,7 @@
 		
         	socket.on('newChatIDCue', function(data){
 			currentChatID = data;
+			console.log(data);
 			HTMLmsg.innerHTML = "Current chat ID: " + data;
         	});
 		
