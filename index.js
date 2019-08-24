@@ -107,7 +107,7 @@ io.on('connection', function(socket){
 									defaultListeners = res[x].listeners;
 							}
 						}
-						socket.emit('loginConfirmCue', { username:socket.username, usernames:onlineList, listeners:defaultListeners, msgs:res, currentChatID:currentChatID });
+						socket.emit('loginConfirmCue', { username:socket.username, chatList:result[0].chatList, usernames:onlineList, listeners:defaultListeners, msgs:res, currentChatID:currentChatID });
 					});					
 				}
 			});
