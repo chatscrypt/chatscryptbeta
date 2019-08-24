@@ -252,9 +252,15 @@
 				
 				for(i = 0; i < data.listeners.length; i++)
 				{
-					$('#listenerList').append($('<li>').html(data.listeners[i]));
-					listenerList.push(data.listeners[i]);
+					//$('#listenerList').append($('<li>').html(data.listeners[i]));
+					//listenerList.push(data.listeners[i]);
 					socket.emit('addListenerCue', data.listeners[i]);
+				}
+				
+				for(i = 0; i < data.chatList.length; i++)
+				{
+					$('#chatList').append($('<li>').html(data.chatList[i]));
+					chatList.push(data.chatList[i]);
 				}
 			}
 			else {
@@ -413,10 +419,12 @@
 			$('#messages').empty();
 			$('#onlineList').empty();
 			$('#listenerList').empty();
+			$('#chatList').empty();
 			$('#msgQueue').empty();	
 			
-		    onlineList.length = 0;
+		    	onlineList.length = 0;
 			listenerList.length = 0;
+			chatList.length = 0;
 			msgQueue.length = 0;
 			myUsername = "";
 			
