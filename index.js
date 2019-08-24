@@ -13,25 +13,25 @@ const database = "betadb";
 var connection = MongoClient.connect(url, {useNewUrlParser: true});
 
 var onlineList = [];
-var currentChatID = 0;
+var maxChatID = 0;
 
 app.get('/', function(req, res){
 	res.sendFile(__dirname + '/index.html');
 });
 
 connection.then(function(db){
-	var myquery = { dataName: "currentChatID" };
+	var myquery = { dataName: "maxChatID" };
 	connection.then(function(db){			
 		db.db(database).collection("data").find(myquery).toArray(function(err, result) {
 			if (err) throw err;
 			if (result.length == 0) {
-				var newChatIDNumber = { dataName: "currentChatID", dataValue:1 };
+				var newChatIDNumber = { dataName: "maxChatID", dataValue:1 };
 				db.db(database).collection("data").insertOne(newChatIDNumber, function(err, res) {
 					if (err) throw err;
 				});
 			}
 			else {
-				currentChatID = result[0].dataValue;
+				maxChatID = result[0].dataValue;
 			}
 		});
 	});		  
@@ -67,13 +67,13 @@ io.on('connection', function(socket){
   
 	
 	socket.on('newChatCue', function(){
-		currentChatID++;
- 		var myQuery = { dataName: "currentChatID" };
- 		var newValues = { $set: {dataValue: currentChatID } };
+		maxChatID++;
+ 		var myQuery = { dataName: "maxChatID" };
+ 		var newValues = { $set: {dataValue: maxChatID } };
 		connection.then(function(db){			
 			db.db(database).collection("data").updateOne(myQuery, newValues, function(err, res) {
   				if (err) throw err;
-				socket.emit('newChatIDCue', currentChatID);
+				socket.emit('newChatIDCue', maxChatID);
 			});
 		});
 	});
