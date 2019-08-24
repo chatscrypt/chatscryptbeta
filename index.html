@@ -354,7 +354,7 @@
 		
         $('#regForm').submit(function(event){
 			event.preventDefault(); // prevents page reloading
-			socket.emit('regCue', { username: $('#regUsername').val(), password: $('#regPassword').val() });
+			socket.emit('regCue', { username: $('#regUsername').val(), password: $('#regPassword').val(), chatList: chatList });
 			$('#regPassword').val('');
 			$('#regUsername').val('');
 			return false;
