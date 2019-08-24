@@ -152,12 +152,12 @@ io.on('connection', function(socket){
 			for (x in io.sockets.adapter.rooms['loggedIn'].sockets)
 			{
 				if (io.sockets.connected[x].username == data.listeners[i])
-					io.sockets.connected[x].emit('serverMsgCue', { speaker:socket.username, msg:data.msg, time:data.time });
+					io.sockets.connected[x].emit('serverMsgCue', { speaker:socket.username, msg:data.msg, time:data.time, chatID:data.chatID });
 			}
 		}
 		
 		// add message to database
-		var dbData = { speaker:socket.username, listeners:data.listeners, msg:data.msg, time:data.time };
+		var dbData = { speaker:socket.username, listeners:data.listeners, msg:data.msg, time:data.time, chatID:data.chatID };
 		connection.then(function(db){
 				db.db(database).collection("messages").insertOne(dbData, function(err, res) {
 					if (err) throw err;
@@ -168,7 +168,7 @@ io.on('connection', function(socket){
 		for (x in io.sockets.adapter.rooms['loggedIn'].sockets)
 		{
 			if (io.sockets.connected[x].username == socket.username)
-				io.sockets.connected[x].emit('serverMsgCue', { speaker:socket.username, msg:data.msg, time:data.time });
+				io.sockets.connected[x].emit('serverMsgCue', { speaker:socket.username, msg:data.msg, time:data.time, chatID:data.chatID });
 		}
 	});
 	
