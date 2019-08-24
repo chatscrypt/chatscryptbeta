@@ -172,12 +172,12 @@ io.on('connection', function(socket){
 		});
 		
 		// add chatID to all the listener's chatLists, if not already there
-		for (i = 0; i < data.listeners.length; i++)
-		{
-			var myQueryTest = { username: data.listeners[i], chatList:currentChatID };
-			var myQuery = { username: data.listeners[i] };
-			var newValues = { $push: { chatList: currentChatID } };
-			connection.then(function(db){		
+		connection.then(function(db){		
+			for (i = 0; i < data.listeners.length; i++)
+			{
+				var myQueryTest = { username: data.listeners[i], chatList:currentChatID };
+				var myQuery = { username: data.listeners[i] };
+				var newValues = { $push: { chatList: currentChatID } };
 				db.db(database).collection("users").find(myQueryTest).toArray(function(err, result) {
 					if (err) throw err;				
 					if (result.length == 0) {
@@ -191,14 +191,12 @@ io.on('connection', function(socket){
 						});
 					}
 				});
-			});
-		}
-		
-		// also possibly add to self
-		var myQueryTest = { username: socket.username, chatList:currentChatID };
-		var myQuery = { username: socket.username };
-		var newValues = { $push: { chatList: currentChatID } };
-		connection.then(function(db){		
+			}
+			
+			// also possibly add to self
+			var myQueryTest = { username: socket.username, chatList:currentChatID };
+			var myQuery = { username: socket.username };
+			var newValues = { $push: { chatList: currentChatID } };
 			db.db(database).collection("users").find(myQueryTest).toArray(function(err, result) {
 				if (err) throw err;				
 				if (result.length == 0) {
@@ -213,6 +211,7 @@ io.on('connection', function(socket){
 				}
 			});
 		});
+		
 		
 		// send to self as well, since not listed as a listener
 		for (x in io.sockets.adapter.rooms['loggedIn'].sockets)
