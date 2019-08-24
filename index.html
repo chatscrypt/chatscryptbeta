@@ -325,6 +325,7 @@
 		
         	socket.on('newChatIDCue', function(data){
 			currentChatID = data;
+			HTMLmsg.innerHTML = data;
         	});
 		
 		socket.on('disconnect', function(){
