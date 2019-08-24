@@ -137,6 +137,20 @@ io.on('connection', function(socket){
 		}
 	});
   
+	
+	socket.on('checkChatIDCue', data) {
+		var query = { username: socket.username, chatList: data };
+		connection.then(function(db){
+			db.db(database).collection("users").find(query).toArray(function(err, result) {
+				if (err) throw err;
+				if (result.length == 0) {
+					socket.emit('addChatIDCue', data);
+				}
+			});
+		}); 
+	});
+	
+	
 	socket.on('clientMsgCue', function(data){
 		
 		var currentChatID = data.chatID;		
@@ -176,18 +190,12 @@ io.on('connection', function(socket){
 			for (i = 0; i < data.listeners.length; i++) {
 				db.db(database).collection("users").updateOne( { username: data.listeners[i] }, { $addToSet: { chatList: currentChatID } }, function(err, res) {
 					if (err) throw err;
-					for (x in io.sockets.adapter.rooms['loggedIn'].sockets)
-					{
-						if (io.sockets.connected[x].username == data.listeners[i])
-							io.sockets.connected[x].emit('addChatIDCue', currentChatID);
-					}							
 				});
 			}
 			
 			// also possibly add to self
 			db.db(database).collection("users").updateOne({ username: socket.username },  { $addToSet: { chatList: currentChatID } }, function(err, res) {
 				if (err) throw err;
-				socket.emit('addChatIDCue', currentChatID);
 			});
 		});
 		
