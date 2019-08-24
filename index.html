@@ -134,6 +134,8 @@
 			chatList.push(data.chatID);
 			$('#chatList').append($('<li>').html("<button onclick=\"myFunction(" + data.chatID + ")\">Chat " + data.chatID + "</button>"));
 			    
+			if (currentChatID == data.chatID)
+				$('#messages').empty();
 			currentChatID = data.chatID;
 		
 			$('#messages').append($('<li>').html("<b>" + '(' + moment(data.time).format('M/DD/YYYY h:mm:ss A') + ") " + data.speaker + "</b>" + ': ' + data.msg));
