@@ -100,7 +100,7 @@ io.on('connection', function(socket){
 						if (err) throw err;
 						var recent = 0;
 						var defaultListeners = [];
-						var currentChatID = 0;
+						var currentChatID = 1;
 						for (x in res){
 							if (res[x].time > recent)
 							{
