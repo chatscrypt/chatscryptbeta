@@ -481,8 +481,8 @@
 		}
 		
 		function myFunction(data) {
-			socket.emit('loadChatCue', data);
 			currentChatID = data;
+			socket.emit('loadChatCue', data);
 		}
 
 		
