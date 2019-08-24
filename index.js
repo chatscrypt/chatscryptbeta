@@ -15,6 +15,16 @@ var connection = MongoClient.connect(url, {useNewUrlParser: true});
 var onlineList = [];
 var maxChatID = 0;
 
+
+// https redirect
+app.use((req, res, next) => {
+  if (req.header('x-forwarded-proto') !== 'https') {
+    res.redirect(`https://${req.header('host')}${req.url}`)
+  } else {
+    next();
+  }
+});
+
 app.get('/', function(req, res){
 	res.sendFile(__dirname + '/index.html');
 });
