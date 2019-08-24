@@ -136,19 +136,7 @@ io.on('connection', function(socket){
 			socket.username = '';
 		}
 	});
-  
-	
-	socket.on('checkChatIDCue', function(data) {
-		var query = { username: socket.username, chatList: data };
-		connection.then(function(db){
-			db.db(database).collection("users").find(query).toArray(function(err, result) {
-				if (err) throw err;
-				if (result.length == 0) {
-					socket.emit('addChatIDCue', data);
-				}
-			});
-		}); 
-	});
+
 	
 	
 	socket.on('clientMsgCue', function(data){
