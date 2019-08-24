@@ -109,6 +109,11 @@
 			$('#msgBox').val('');
 			return false;
         });
+			
+        socket.on('addChatIDCue', function(data){
+		$('#chatList').append($('<li>').html(data));
+		chatList.push(data);
+	});
 		
         socket.on('serverMsgCue', function(data){
 		
@@ -126,10 +131,6 @@
 					document.getElementById("msgContainer").scrollTo(0,document.getElementById("msgContainer").scrollHeight);
 				}
 			}
-			if (currentChatID != data.chatID) {
-				socket.emit('newChatIDCue', data.chatID);
-			}
-			    
 			    
 			currentChatID = data.chatID;
 			$('#messages').append($('<li>').html("<b>" + '(' + moment(data.time).format('M/DD/YYYY h:mm:ss A') + ") " + data.speaker + "</b>" + ': ' + data.msg));
