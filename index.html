@@ -247,6 +247,22 @@
 			reloadLoginScreen("Invalid username or password.");
         });
 		
+		
+		
+		
+        socket.on('loadChatConfirmCue', function(data){
+		$('#messages').empty();
+		for (x in data.msgs){
+			$('#messages').append($('<li>').html("<b>" + '(' + moment(data.msgs[x].time).format('M/DD/YYYY h:mm:ss A') + ") " + data.msgs[x].speaker + "</b>" + ': ' + data.msgs[x].msg));
+		}
+		
+		for(i = 0; i < data.listeners.length; i++)
+		{
+			socket.emit('addListenerCue', data.listeners[i]);
+		}
+		
+	});
+		
         socket.on('loginConfirmCue', function(data){
 			if (myUsername != data.username) {
 				// reload everything
@@ -457,6 +473,7 @@
 		
 		function myFunction(data) {
 			socket.emit('loadChatCue', data);
+			currentChatID = data;
 		}
 
 		
