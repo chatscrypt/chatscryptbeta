@@ -128,11 +128,11 @@
 				}
 			}
 		
-			removeFromList(document.getElementById("chatList"), "<form id=\"chat"+ data.chatID + "\"><button>Chat " + data.chatID + "</button></form>");
+			removeFromList(document.getElementById("chatList"), "<button onclick=\"myFunction(" + data.chatID + ")\">Chat " + data.chatID + "</button>");
 			removeFromArray(chatList, data.chatID);
 			
 			chatList.push(data.chatID);
-			$('#chatList').append($('<li>').html("<form id=\"chat"+ data.chatID + "\"><button>Chat " + data.chatID + "</button></form>"));
+			$('#chatList').append($('<li>').html("<button onclick=\"myFunction(" + data.chatID + ")\">Chat " + data.chatID + "</button>"));
 			    
 			currentChatID = data.chatID;
 		
@@ -263,7 +263,7 @@
 				
 				for(i = 0; i < data.chatList.length; i++)
 				{
-					$('#chatList').append($('<li>').html("<form id=\"chat"+ data.chatList[i] + "\"><button>Chat " + data.chatList[i] + "</button></form>"));
+					$('#chatList').append($('<li>').html("<button onclick=\"myFunction(" + data.chatList[i] + ")\">Chat " + data.chatList[i] + "</button>"));
 					chatList.push(data.chatList[i]);
 				}
 			}
@@ -453,6 +453,10 @@
 					i--;
 				}
 			}
+		}
+		
+		function myFunction() {
+			HTMLmsg.innerHTML = "Hello World";
 		}
 
 		
